@@ -28,24 +28,13 @@ namespace Writer
         /// </summary>
         private void InitializeComponent()
         {
-            this.writingTextBox = new System.Windows.Forms.TextBox();
             this.saveButton = new System.Windows.Forms.Button();
             this.progressPanel = new System.Windows.Forms.Panel();
             this.loadButton = new System.Windows.Forms.Button();
             this.monthPanel = new System.Windows.Forms.Panel();
             this.notificationLabel = new System.Windows.Forms.Label();
+            this.writingRichTextBox = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
-            // 
-            // writingTextBox
-            // 
-            this.writingTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.writingTextBox.Font = new System.Drawing.Font("Lato", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.writingTextBox.Location = new System.Drawing.Point(33, 176);
-            this.writingTextBox.Multiline = true;
-            this.writingTextBox.Name = "writingTextBox";
-            this.writingTextBox.Size = new System.Drawing.Size(1010, 389);
-            this.writingTextBox.TabIndex = 0;
-            this.writingTextBox.TextChanged += new System.EventHandler(this.writingTextBox_TextChanged);
             // 
             // saveButton
             // 
@@ -89,6 +78,7 @@ namespace Writer
             this.monthPanel.Size = new System.Drawing.Size(650, 134);
             this.monthPanel.TabIndex = 5;
             this.monthPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.monthPanel_Paint);
+            this.monthPanel.MouseClick += new System.Windows.Forms.MouseEventHandler(this.monthPanel_MouseClick);
             // 
             // notificationLabel
             // 
@@ -99,33 +89,44 @@ namespace Writer
             this.notificationLabel.Size = new System.Drawing.Size(0, 13);
             this.notificationLabel.TabIndex = 6;
             // 
+            // writingRichTextBox
+            // 
+            this.writingRichTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.writingRichTextBox.Font = new System.Drawing.Font("Lato", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.writingRichTextBox.Location = new System.Drawing.Point(33, 189);
+            this.writingRichTextBox.Name = "writingRichTextBox";
+            this.writingRichTextBox.Size = new System.Drawing.Size(1010, 539);
+            this.writingRichTextBox.TabIndex = 7;
+            this.writingRichTextBox.Text = "";
+            this.writingRichTextBox.TextChanged += new System.EventHandler(this.writingRichTextBox_TextChanged);
+            // 
             // WriterForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(1079, 594);
+            this.ClientSize = new System.Drawing.Size(1084, 761);
+            this.Controls.Add(this.writingRichTextBox);
             this.Controls.Add(this.notificationLabel);
             this.Controls.Add(this.monthPanel);
             this.Controls.Add(this.loadButton);
             this.Controls.Add(this.progressPanel);
             this.Controls.Add(this.saveButton);
-            this.Controls.Add(this.writingTextBox);
             this.Name = "WriterForm";
             this.Text = "Writer";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.WriterForm_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
         #endregion
-
-        private System.Windows.Forms.TextBox writingTextBox;
         private System.Windows.Forms.Button saveButton;
         private System.Windows.Forms.Panel progressPanel;
         private System.Windows.Forms.Button loadButton;
         private System.Windows.Forms.Panel monthPanel;
         private System.Windows.Forms.Label notificationLabel;
+        private System.Windows.Forms.RichTextBox writingRichTextBox;
     }
 }
 

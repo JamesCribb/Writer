@@ -8,3 +8,13 @@ E:\C# for Programmers\My Projects\Writer\Writer\obj\Debug\Writer.csproj.Generate
 E:\C# for Programmers\My Projects\Writer\Writer\obj\Debug\Writer.csproj.CoreCompileInputs.cache
 E:\C# for Programmers\My Projects\Writer\Writer\obj\Debug\Writer.exe
 E:\C# for Programmers\My Projects\Writer\Writer\obj\Debug\Writer.pdb
+E:\Programming Tutorials\C# for Programmers\My Projects\Writer\Writer\bin\Debug\Writer.exe.config
+E:\Programming Tutorials\C# for Programmers\My Projects\Writer\Writer\bin\Debug\Writer.exe
+E:\Programming Tutorials\C# for Programmers\My Projects\Writer\Writer\obj\Debug\Writer.csprojAssemblyReference.cache
+E:\Programming Tutorials\C# for Programmers\My Projects\Writer\Writer\obj\Debug\Writer.Properties.Resources.resources
+E:\Programming Tutorials\C# for Programmers\My Projects\Writer\Writer\obj\Debug\Writer.WriterForm.resources
+E:\Programming Tutorials\C# for Programmers\My Projects\Writer\Writer\obj\Debug\Writer.csproj.GenerateResource.cache
+E:\Programming Tutorials\C# for Programmers\My Projects\Writer\Writer\obj\Debug\Writer.csproj.CoreCompileInputs.cache
+E:\Programming Tutorials\C# for Programmers\My Projects\Writer\Writer\obj\Debug\Writer.exe
+E:\Programming Tutorials\C# for Programmers\My Projects\Writer\Writer\obj\Debug\Writer.pdb
+E:\Programming Tutorials\C# for Programmers\My Projects\Writer\Writer\bin\Debug\Writer.pdb

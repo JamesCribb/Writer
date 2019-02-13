@@ -10,11 +10,19 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+// TODO: remove 'magic numbers' in squares. Set constant square side length
+// TODO: Make old entries readonly
+// TODO: Stop saving whatever entry is currently displayed as the day's current entry...
+
 namespace Writer
 {
     public partial class WriterForm : Form
     {
+        private List<EntrySquare> entrySquares;
+
         private const int WordCount = 750;
+        private const int MonthsInPanel = 5; // the number of months to display in the entry record
+
         private int numWords;
         private bool reachedWordCount;
         private string fileName;
@@ -23,6 +31,8 @@ namespace Writer
         {
             numWords = 0;
             reachedWordCount = false;
+
+            entrySquares = new List<EntrySquare>();
 
             InitializeComponent();
 
@@ -33,11 +43,16 @@ namespace Writer
             // Convert the date to the prospective filename
             fileName = today.ToString("d-M-yyyy", CultureInfo.InvariantCulture);
             
-            DisplayFile(fileName);
+            DisplayFile(fileName, true);
             
         }
 
-        private void DisplayFile(string fileName)
+        private bool GetIsTodaysEntry(string fileName)
+        {
+            return fileName.Equals(DateTime.Today.ToString("d-M-yyyy", CultureInfo.InvariantCulture));
+        }
+
+        private void DisplayFile(string fileName, bool isTodaysEntry)
         {
             //Open or create the file
             FileStream inputStream = new FileStream($@"Entries\{fileName}.txt", FileMode.OpenOrCreate);
@@ -46,11 +61,18 @@ namespace Writer
             {
                 string fileText = reader.ReadToEnd();
                 // Print whatever is written to the textbox
-                writingTextBox.Text = fileText;
+                writingRichTextBox.Text = fileText;
                 // Remove the highlight from the added text
-                writingTextBox.SelectionStart = writingTextBox.TextLength;
-                writingTextBox.SelectionLength = 0;
+                writingRichTextBox.SelectionStart = writingRichTextBox.TextLength;
+                writingRichTextBox.SelectionLength = 0;
+                // Paint the progress circle
+                numWords = writingRichTextBox.Text.Split(' ').Count();
+                progressPanel.Refresh();
             }
+            // Set the word count checker
+            reachedWordCount = writingRichTextBox.Text.Split(' ').Count() >= WordCount;
+
+            writingRichTextBox.ReadOnly = !isTodaysEntry;
         }
 
         private void SaveFile()
@@ -58,7 +80,7 @@ namespace Writer
             using (StreamWriter writer = new StreamWriter(
                 new FileStream($@"Entries\{fileName}.txt", FileMode.Truncate)))
             {
-                string text = writingTextBox.Text;
+                string text = writingRichTextBox.Text;
                 writer.Write(text);
                 writer.Flush();
             }
@@ -67,7 +89,7 @@ namespace Writer
         private void writingTextBox_TextChanged(object sender, EventArgs e)
         {
             notificationLabel.Text = "";
-            numWords = writingTextBox.Text.Split(' ').Count();
+            numWords = writingRichTextBox.Text.Split(' ').Count();
             if (!reachedWordCount)
             {
                 progressPanel.Refresh();
@@ -76,6 +98,8 @@ namespace Writer
 
         private void progressPanel_Paint(object sender, PaintEventArgs e)
         {
+            Console.WriteLine("Updating PP");
+
             using (Graphics g = progressPanel.CreateGraphics())
             {
                 float wordCount = (float)WordCount;
@@ -103,9 +127,14 @@ namespace Writer
 
         private void monthPanel_Paint(object sender, PaintEventArgs e)
         {
-            // Going to try to make something a bit github-ish:
+            // Holds the list of filenames as they are generated.
+            // Used to initialise the values in entry squares
+            // Kind of awkward...
+            List<string> fileNames = new List<string>();
+
             // Get the length of the past X months
-            int numMonthsToInclude = 5;
+            // TODO: Make the ordering a bit more logical?
+            int numMonthsToInclude = MonthsInPanel;
             int[] monthArray = new int[numMonthsToInclude];
             for (int i = monthArray.Length - 1; i >= 0; i--)
             {
@@ -114,11 +143,11 @@ namespace Writer
 
                 if (month <= 0) // go back a year
                 {
-                    year--; ;
+                    year--;
                     month += 12;
                 }
 
-                monthArray[i] = DateTime.DaysInMonth(year, month);
+                monthArray[(numMonthsToInclude - i) - 1] = DateTime.DaysInMonth(year, month);
             }
 
             // Build a jagged array showing whether or not entries have been written for each day
@@ -133,7 +162,7 @@ namespace Writer
                 tMonth += 12;
             }
             DateTime tracker = new DateTime(tYear, tMonth, 1);
-            
+
             for (int i = 0; i < entryStatusArray.Length; i++)
             {
                 entryStatusArray[i] = new int[monthArray[i]];
@@ -144,6 +173,9 @@ namespace Writer
                 for (int j = 0; j < entryStatusArray[i].Length; j++)
                 {
                     string fName = tracker.ToString("d-M-yyyy", CultureInfo.InvariantCulture);
+
+                    fileNames.Add(fName);
+
                     Console.WriteLine(fName);
                     if (File.Exists($@"Entries\{fName}.txt"))
                     {
@@ -162,6 +194,7 @@ namespace Writer
                         }
                     }
                     tracker = tracker.AddDays(1);
+                    
                 }
             }
 
@@ -174,6 +207,9 @@ namespace Writer
                 Brush substanialEntryBrush = new SolidBrush(Color.FromArgb(140, 196, 123));
                 Brush fullEntryBrush = new SolidBrush(Color.FromArgb(79, 132, 63));
                 Brush brush;
+
+                // Iterate through the filenames stored above. Pretty awkward...
+                int fileNameCounter = -1;
 
                 for (int y = 0; y < monthArray.Length; y++)
                 {
@@ -196,16 +232,49 @@ namespace Writer
                             brush = noEntryBrush;
                         }
                         g.FillRectangle(brush, x * 20, y * 20, 15, 15);
+                        // Add square representation to list of squares
+                        entrySquares.Add(new EntrySquare(x * 20, y * 20, 
+                            entryStatusArray[y][x] != 0, 
+                            fileNames[++fileNameCounter]));
                     }
                 }
             }
+        }
 
-            // TEST
-            //for (int i = 0; i < monthArray.Length; i++)
-            //{
-            //    testTexBox.AppendText($"Month {i} has {monthArray[i]} days\n");
-            //}
+        // When the user clicks an old entry in the month panel, load that entry
+        private void monthPanel_MouseClick(object sender, MouseEventArgs e)
+        {
+            bool clickedOnSquare = false;
+            bool entExists = false;
+            string entFileName = "";
 
+            if (e.Button == MouseButtons.Left)
+            {
+                foreach (EntrySquare entrySquare in entrySquares)
+                {
+                    if (e.X >= entrySquare.XPos && e.X <= entrySquare.XPos + 14
+                        && e.Y >= entrySquare.YPos && e.Y <= entrySquare.YPos + 14)
+                    {
+                        clickedOnSquare = true;
+                        if (entrySquare.EntryExists)
+                        {
+                            entExists = true;
+                            entFileName = entrySquare.FileName;
+                        }
+                        break;
+                    }
+                }
+
+                if (clickedOnSquare && entExists)
+                {
+                    if (fileName.Equals(DateTime.Today.ToString("d-M-yyyy", CultureInfo.InvariantCulture)))
+                    {
+                        SaveFile();
+                    }
+                    fileName = entFileName;
+                    DisplayFile(fileName, GetIsTodaysEntry(fileName));
+                }
+            }
         }
 
         private void loadButton_Click(object sender, EventArgs e)
@@ -222,9 +291,25 @@ namespace Writer
             {
                 // We only want the name part of the file, not the directory or extension
                 string fileToLoad = Path.GetFileNameWithoutExtension(ofd.FileName);
-                DisplayFile(fileToLoad);
-            }
-
+                DisplayFile(fileToLoad, GetIsTodaysEntry(fileToLoad));
+            } 
         }
+
+        private void writingRichTextBox_TextChanged(object sender, EventArgs e)
+        {
+            notificationLabel.Text = "";
+            numWords = writingRichTextBox.Text.Split(' ').Count();
+            if (!reachedWordCount)
+            {
+                progressPanel.Refresh();
+            }
+        }
+
+        // Save the current entry before closing
+        private void WriterForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SaveFile();
+        }
+        
     }
 }
